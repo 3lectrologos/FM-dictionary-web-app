@@ -21,13 +21,23 @@ const config: Config = {
       offwhite: '#f4f4f4',
       white: '#ffffff',
       purple: '#a445ed',
+      darkpurple: '#8F19E8',
       red: '#ff5252'
     },
-    darkMode: 'class',
-    future: {
-      hoverOnlyWhenSupported: true
+    boxShadow: {
+      'dropdown-light': '0px 5px 30px 0px rgba(0, 0, 0, 0.10)',
+      'dropdown-dark': '0px 5px 30px 0px #A445ED'
+    },
+    fontFamily: {
+      serif: ['var(--font-lora)', 'serif'],
+      sans: ['var(--font-inter)', 'sans-serif'],
+      mono: ['var(--font-inconsolata)', 'monospace']
     }
   },
   plugins: [],
+  darkMode: 'class',
+  future: {
+    hoverOnlyWhenSupported: true
+  }
 }
 export default config

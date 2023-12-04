@@ -11,7 +11,7 @@
 }
 
 .text-heading-sm {
-  @apply text-[16px] tablet:text-[20px] font-[400] leading-[1.2];
+  @apply text-[16px] tablet:text-[20px] font-[400] leading-[1.33] tablet:leading-[1.2];
 }
 
 .text-body-md {
@@ -20,4 +20,12 @@
 
 .text-body-sm {
   @apply text-[14px] tablet:text-[14px] font-[400] leading-[1.2] underline;
+}
+
+.focusable {
+  @apply outline-none focus-visible:outline-1 focus-visible:outline-darkgray/50 focus-visible:outline-offset-2 dark:focus-visible:outline-lightgray/50;
+}
+
+.group-focusable {
+  @apply group-focus-visible:outline-none group-focus-visible:ring-1 group-focus-visible:ring-darkgray/50 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-lightgray dark:group-focus-visible:ring-lightgray/50 dark:group-focus-visible:ring-offset-darkgray;
 }
