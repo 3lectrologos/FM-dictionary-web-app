@@ -112,38 +112,118 @@ function Synonyms({ synonyms }: { synonyms?: string[] }) {
   )
 }
 
-function Meaning({ partOfSpeech, meanings, synonyms }: { partOfSpeech: string, meanings: string[], synonyms?: string[] }) {
+function Meanings({ meanings, className='' }: { meanings: Meaning[], className?: string }) {
   return (
-    <>
+    <ul className={twMerge(
+      `flex flex-col gap-y-[13px]`,
+      `${className}`
+      )}
+    >
+      {
+        meanings.map((meaning, idx) =>
+          <li className={twMerge(
+            `relative flex flex-row gap-x-4 text-body-md`,
+            `marker:content-['•']`
+          )}
+              key={idx}
+          >
+            <div className={`flex items-center h-min bg-darkpurple rounded-full invisible`}>
+              <div className={`w-[5px] h-[5px] rounded-full bg-darkpurple visible`} />
+              i
+            </div>
+            <div className={`flex flex-col gap-y-[13px]`}>
+                <span>
+                  {meaning.definition}
+                </span>
+              {
+                meaning.example &&
+                <span className={`text-gray`}>
+                    “{meaning.example}”
+                  </span>
+              }
+            </div>
+          </li>
+        )
+      }
+    </ul>
+  )
+}
+
+function WordDetail({ partOfSpeech, meanings, synonyms }: { partOfSpeech: string, meanings: Meaning[], synonyms?: string[] }) {
+  return (
+    <div>
       <PartOfSpeech className={`mb-8`} partOfSpeech={partOfSpeech} />
       <div className={`text-heading-sm text-gray mb-[17px]`}>
         Meaning
       </div>
-      <ul className={`flex flex-col gap-y-[13px] list-disc marker:text-darkpurple list-outside pl-2 mb-5`}>
-        {
-          meanings.map((meaning, idx) =>
-            <li className={twMerge(
-              `text-body-md pl-[18px]`,
-              `marker:content-['•']`
-            )}
-              key={idx}>
-              {meaning}
-            </li>
-          )
-        }
-      </ul>
+      <Meanings className={`mb-7`}
+        meanings={meanings} />
       { synonyms && (synonyms.length > 0) && <Synonyms synonyms={synonyms} /> }
-    </>
+    </div>
   )
 }
 
-const partOfSpeech = `noun`
-const meanings = [
-  '(etc.) A set of keys used to operate a typewriter, computer etc.',
-  'A component of many instruments including the piano, organ, and harpsichord consisting of usually black and white keys that cause different tones to be produced when struck.',
-  'A device with keys of a musical keyboard, used to control electronic sound-producing devices which may be built into or separate from the keyboard device.'
-]
-const synonyms = ['electronic keyboard', 'synthesizer', 'piano', 'organ', 'clavier', 'manual']
+type Word = {
+  word: string,
+  pronunciation: string,
+  details: WorldDetail[]
+}
+
+type WorldDetail = {
+  partOfSpeech: string,
+  meanings: Meaning[],
+  synonyms?: string[]
+}
+
+type Meaning = {
+  definition: string,
+  example?: string
+}
+
+const word: Word = {
+  word: `keyboard`,
+  pronunciation: `/ˈkiːbɔːd/`,
+  details: [
+    {
+      partOfSpeech: `noun`,
+      meanings: [
+        { definition: '(etc.) A set of keys used to operate a typewriter, computer etc.' },
+        { definition: 'A component of many instruments including the piano, organ, and harpsichord consisting of usually black and white keys that cause different tones to be produced when struck.' },
+        { definition: 'A device with keys of a musical keyboard, used to control electronic sound-producing devices which may be built into or separate from the keyboard device.' }
+      ],
+      synonyms: ['electronic keyboard', 'synthesizer', 'piano', 'organ', 'clavier', 'manual']
+    },
+    {
+      partOfSpeech: `verb`,
+      meanings: [
+        {
+          definition: 'To type on a computer keyboard.',
+          example: 'Keyboarding is the part of this job I hate the most.'
+        }
+      ]
+    }
+  ]
+}
+const source = 'https://en.wiktionary.org/wiki/keyboard'
+
+function Source( { source, className='' }: { source: string, className?: string } ) {
+  return (
+    <div className={`flex flex-col gap-y-2`}>
+      <span className={`text-body-sm underline-offset-2 text-gray`}>
+        Source
+      </span>
+      <div className={`flex flex-row items-center gap-x-[9px]`}>
+        <span className={`text-body-sm underline-offset-1`}>
+          {source}
+        </span>
+        <div className={`relative w-[14px] h-full`}>
+          <Image src='/images/icon-new-window.svg' alt='Link icon' fill />
+        </div>
+      </div>
+    </div>
+  )
+
+}
 
 export default function Home() {
   return (
@@ -156,13 +236,23 @@ export default function Home() {
         <div className={`flex flex-col gap-y-6 mb-8`}>
           <TopBar />
           <Search />
-          <WordTitle word={`keyboard`} pronunciation={`/ˈkiːbɔːd/`} />
+          <WordTitle word={word.word} pronunciation={word.pronunciation} />
         </div>
-        <Meaning
-          partOfSpeech={partOfSpeech}
-          meanings={meanings}
-          synonyms={synonyms}
-        />
+        <div className={`flex flex-col gap-y-8`}>
+        {
+          word.details.map((detail, idx) =>
+
+              <WordDetail
+                key={idx}
+                partOfSpeech={detail.partOfSpeech}
+                meanings={detail.meanings}
+                synonyms={detail.synonyms}
+              />
+          )
+        }
+        </div>
+        <div className={`w-full h-px bg-lightgray dark:bg-darkgray mb-6`} />
+        <Source source={source} />
       </div>
     </div>
   )

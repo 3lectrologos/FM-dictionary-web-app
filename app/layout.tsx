@@ -4,15 +4,16 @@ import './globals.css'
 import ThemeProvider from '@/app/ThemeProvider'
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ['latin-ext'],
   variable: '--font-inter'
 })
 const lora = Lora({
-  subsets: ['latin'],
+  subsets: ['latin-ext'],
+  style: ['normal', 'italic'],
   variable: '--font-lora'
 })
 const inconsolata = Inconsolata({
-  subsets: ['latin'],
+  subsets: ['latin-ext'],
   variable: '--font-inconsolata'
 })
 
