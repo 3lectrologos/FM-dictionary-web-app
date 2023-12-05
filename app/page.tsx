@@ -1,10 +1,16 @@
 'use client'
 
 import Image from 'next/image'
-import { twMerge } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import ThemeToggle from '@/app/ThemeToggle'
 import FontSelector from '@/app/FontSelector'
-import { Play } from 'next/dist/compiled/@next/font/dist/google'
+import { debounce } from 'lodash'
+import { useState } from 'react'
+import { Definition, Phonetics, Word } from '@/app/types'
+import Link from 'next/link'
+import useSound from 'use-sound'
+import ScaleLoader from 'react-spinners/ScaleLoader'
+import { PuffLoader } from 'react-spinners'
 
 function TopBar() {
   return (
@@ -21,7 +27,7 @@ function TopBar() {
   )
 }
 
-function Search() {
+function Search({ onChange }: { onChange: (term: string) => void }) {
   return (
     <div className={`relative w-[327px]`}>
       <input
@@ -30,8 +36,10 @@ function Search() {
           `bg-offwhite dark:bg-offblack text-verydarkgray dark:text-white`,
           `focus:outline-none focus:ring-1 ring-purple`
         )}
+        type='text'
         name='search'
         placeholder={`Search for any word...`}
+        onChange={(e) => onChange(e.target.value)}
       />
       <div className={`absolute w-[18px] h-[18px] shrink-0 right-6 top-1/2 transform -translate-y-1/2`}>
         <Image src='/images/icon-search.svg' alt='Search icon' fill />
@@ -40,27 +48,69 @@ function Search() {
   )
 }
 
-function PlayButton() {
+function PlayButton({ url }: { url: string }) {
+  const [playing, setPlaying] = useState(false)
+  const [play] = useSound(url, {
+    interrupt: true,
+    onend: () => {
+      setPlaying(false)
+    }
+  })
+
+  function onPlay() {
+    if (playing) {
+      return
+    }
+    setPlaying(true)
+    play()
+  }
+
   return (
-    <div className={`relative w-12 h-12 rounded-full transition bg-purple/25 hover:transition hover:bg-purple group cursor-pointer`}>
-      <Image className={`rounded-full transition-opacity group-hover:transition-opacity group-hover:opacity-0`} src={`/images/icon-play.svg`} alt={`Play icon`} fill />
-      <Image className={`rounded-full transition-opacity opacity-0 group-hover:block group-hover:transition-opacity group-hover:opacity-100`} src={`/images/icon-play-white.svg`} alt={`Play icon`} fill />
-    </div>
+    <button className={twJoin(
+      `relative flex justify-center items-center w-12 h-12 rounded-full transition bg-purple/25 group cursor-pointer`,
+      `hover:transition ${playing ? 'hover:bg-purple/25' : 'hover:bg-purple'}`,
+      `focusable`
+      )}
+         onClick={onPlay}
+    >
+      { playing ?
+        <PuffLoader
+          color={`#A445ED`}
+          size={28}
+        /> :
+        <>
+          <Image className={`rounded-full transition-opacity group-hover:transition-opacity group-hover:opacity-0`} src={`/images/icon-play.svg`} alt={`Play icon`} fill />
+          <Image className={`rounded-full transition-opacity opacity-0 group-hover:block group-hover:transition-opacity group-hover:opacity-100`} src={`/images/icon-play-white.svg`} alt={`Play icon`} fill />
+        </>
+      }
+    </button>
   )
 }
 
-function WordTitle({ word, pronunciation }: { word: string, pronunciation: string }) {
+function WordTitle({ word, phonetics, className='' }: { word: string, phonetics: Phonetics[], className?: string }) {
+  let textAndAudio = phonetics.find(phonetic => phonetic.text && phonetic.audio)
+  if (!textAndAudio) {
+    textAndAudio = phonetics.find(phonetic => phonetic.text)
+  }
+  const text = textAndAudio?.text
+  const audio = textAndAudio?.audio
+
   return (
-    <div className={`flex flex-row justify-between items-center`}>
+    <div className={twMerge(
+      `flex flex-row justify-between items-center`,
+      `${className}`
+    )}
+    >
       <div className={`flex flex-col gap-y-2`}>
         <span className={`text-heading-lg`}>
           {word}
         </span>
-        <span className={`text-heading-md text-purple`}>
-          {pronunciation}
-        </span>
+        { text &&
+          <span className={`text-heading-md text-purple`}>
+            {text}
+          </span> }
       </div>
-      <PlayButton />
+      { audio && <PlayButton url={audio} /> }
     </div>
   )
 }
@@ -71,7 +121,7 @@ function PartOfSpeech({ partOfSpeech, className='' }: { partOfSpeech: string, cl
       `flex flex-row w-full gap-x-4 items-center`,
       `${className}`
     )}>
-      <span className={twMerge(
+      <span className={twJoin(
         `text-heading-md`,
         `!font-bold italic`
       )}>
@@ -82,23 +132,23 @@ function PartOfSpeech({ partOfSpeech, className='' }: { partOfSpeech: string, cl
   )
 }
 
-function Synonyms({ synonyms }: { synonyms?: string[] }) {
+function Synonyms({ synonyms, label='Synonyms' }: { synonyms: string[], label?: string }) {
   return (
     <div className={`flex flex-row gap-x-4`}>
       <span
-        className={twMerge(
+        className={twJoin(
           `text-heading-sm text-gray`,
           `!leading-[1.5]`
         )}
       >
-        Synonyms
+        {label}
       </span>
       <div className={`flex flex-row flex-wrap gap-x-4`}>
         {
           synonyms?.map((synonym, idx) =>
             <span
-              className={twMerge(
-                `text-heading-md text-purple`,
+              className={twJoin(
+                `text-heading-sm text-purple`,
                 `!font-bold !leading-[1.5]`
               )}
               key={idx}
@@ -112,7 +162,7 @@ function Synonyms({ synonyms }: { synonyms?: string[] }) {
   )
 }
 
-function Meanings({ meanings, className='' }: { meanings: Meaning[], className?: string }) {
+function Definitions({ definitions, className='' }: { definitions: Definition[], className?: string }) {
   return (
     <ul className={twMerge(
       `flex flex-col gap-y-[13px]`,
@@ -120,7 +170,7 @@ function Meanings({ meanings, className='' }: { meanings: Meaning[], className?:
       )}
     >
       {
-        meanings.map((meaning, idx) =>
+        definitions.map((definition, idx) =>
           <li className={twMerge(
             `relative flex flex-row gap-x-4 text-body-md`,
             `marker:content-['•']`
@@ -131,15 +181,15 @@ function Meanings({ meanings, className='' }: { meanings: Meaning[], className?:
               <div className={`w-[5px] h-[5px] rounded-full bg-darkpurple visible`} />
               i
             </div>
-            <div className={`flex flex-col gap-y-[13px]`}>
+            <div className={`flex flex-col gap-y-2`}>
                 <span>
-                  {meaning.definition}
+                  {definition.definition}
                 </span>
               {
-                meaning.example &&
-                <span className={`text-gray`}>
-                    “{meaning.example}”
-                  </span>
+                definition.example &&
+                <span className={`text-gray ${(idx === definitions.length - 1) ? '' : 'mb-2'}`}>
+                  “{definition.example}”
+                </span>
               }
             </div>
           </li>
@@ -149,62 +199,27 @@ function Meanings({ meanings, className='' }: { meanings: Meaning[], className?:
   )
 }
 
-function WordDetail({ partOfSpeech, meanings, synonyms }: { partOfSpeech: string, meanings: Meaning[], synonyms?: string[] }) {
+function Meaning({ partOfSpeech, definitions }: { partOfSpeech: string, definitions: Definition[] }) {
+  const allSynonyms = definitions.reduce(
+    (acc: string[], definition) => definition.synonyms ? acc.concat(definition.synonyms) : acc,
+    [])
+
+  const allAntonyms = definitions.reduce(
+    (acc: string[], definition) => definition.antonyms ? acc.concat(definition.antonyms) : acc,
+    [])
+
   return (
-    <div>
-      <PartOfSpeech className={`mb-8`} partOfSpeech={partOfSpeech} />
-      <div className={`text-heading-sm text-gray mb-[17px]`}>
+    <div className={`flex flex-col gap-y-4`}>
+      <PartOfSpeech className={`mb-4`} partOfSpeech={partOfSpeech} />
+      <div className={`text-heading-sm text-gray mb-[1px]`}>
         Meaning
       </div>
-      <Meanings className={`mb-7`}
-        meanings={meanings} />
-      { synonyms && (synonyms.length > 0) && <Synonyms synonyms={synonyms} /> }
+      <Definitions className={``} definitions={definitions} />
+      { (allSynonyms.length > 0) && <Synonyms synonyms={allSynonyms} /> }
+      { (allAntonyms.length > 0) && <Synonyms synonyms={allAntonyms} label='Antonyms' /> }
     </div>
   )
 }
-
-type Word = {
-  word: string,
-  pronunciation: string,
-  details: WorldDetail[]
-}
-
-type WorldDetail = {
-  partOfSpeech: string,
-  meanings: Meaning[],
-  synonyms?: string[]
-}
-
-type Meaning = {
-  definition: string,
-  example?: string
-}
-
-const word: Word = {
-  word: `keyboard`,
-  pronunciation: `/ˈkiːbɔːd/`,
-  details: [
-    {
-      partOfSpeech: `noun`,
-      meanings: [
-        { definition: '(etc.) A set of keys used to operate a typewriter, computer etc.' },
-        { definition: 'A component of many instruments including the piano, organ, and harpsichord consisting of usually black and white keys that cause different tones to be produced when struck.' },
-        { definition: 'A device with keys of a musical keyboard, used to control electronic sound-producing devices which may be built into or separate from the keyboard device.' }
-      ],
-      synonyms: ['electronic keyboard', 'synthesizer', 'piano', 'organ', 'clavier', 'manual']
-    },
-    {
-      partOfSpeech: `verb`,
-      meanings: [
-        {
-          definition: 'To type on a computer keyboard.',
-          example: 'Keyboarding is the part of this job I hate the most.'
-        }
-      ]
-    }
-  ]
-}
-const source = 'https://en.wiktionary.org/wiki/keyboard'
 
 function Source( { source, className='' }: { source: string, className?: string } ) {
   return (
@@ -212,9 +227,11 @@ function Source( { source, className='' }: { source: string, className?: string 
       <span className={`text-body-sm underline-offset-2 text-gray`}>
         Source
       </span>
-      <div className={`flex flex-row items-center gap-x-[9px]`}>
+      <div className={`flex flex-row items-center gap-x-[15px]`}>
         <span className={`text-body-sm underline-offset-1`}>
-          {source}
+          <Link className={`focusable`} href={source} target='_blank'>
+            {source}
+          </Link>
         </span>
         <div className={`relative w-[14px] h-full`}>
           <Image src='/images/icon-new-window.svg' alt='Link icon' fill />
@@ -225,7 +242,59 @@ function Source( { source, className='' }: { source: string, className?: string 
 
 }
 
+function WordDetails({ word }: { word: Word}) {
+  return (
+    <>
+      <WordTitle
+        className={`mb-8`}
+        word={word.word}
+        phonetics={word.phonetics}
+      />
+      <div className={`flex flex-col gap-y-8 mb-8`}>
+        {
+          word.meanings.map((meaning, idx) =>
+            <Meaning
+              key={idx}
+              partOfSpeech={meaning.partOfSpeech}
+              definitions={meaning.definitions}
+            />
+          )
+        }
+      </div>
+      <div className={`w-full h-px bg-lightgray dark:bg-darkgray mb-6`} />
+      { word.sourceUrls && word.sourceUrls.length > 0 && <Source source={word.sourceUrls[0]} /> }
+    </>
+  )
+}
+
 export default function Home() {
+  const [word, setWord] = useState<Word|null>(null)
+
+  function onSearch(term: string) {
+    fetchWord(term)
+  }
+
+  function fetchWord(term: string) {
+    const trimmed = term.trim()
+    if (trimmed.length === 0) {
+      setWord(null)
+      return
+    }
+    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${trimmed}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.title) {
+          setWord(null)
+          return
+        }
+        setWord(data[0])
+      })
+      .catch(error => {
+        console.log(error)
+        setWord(null)
+      })
+  }
+
   return (
     <div className={`flex min-h-screen min-w-fit justify-center bg-white dark:bg-black text-verydarkgray dark:text-white`}>
       <div className={twMerge(
@@ -233,26 +302,12 @@ export default function Home() {
         `w-full`,
         `p-6`
         )}>
-        <div className={`flex flex-col gap-y-6 mb-8`}>
+        <div className={`flex flex-col gap-y-6 mb-[28px]`}>
           <TopBar />
-          <Search />
-          <WordTitle word={word.word} pronunciation={word.pronunciation} />
+          <Search onChange={debounce(onSearch, 750)} />
         </div>
-        <div className={`flex flex-col gap-y-8`}>
-        {
-          word.details.map((detail, idx) =>
 
-              <WordDetail
-                key={idx}
-                partOfSpeech={detail.partOfSpeech}
-                meanings={detail.meanings}
-                synonyms={detail.synonyms}
-              />
-          )
-        }
-        </div>
-        <div className={`w-full h-px bg-lightgray dark:bg-darkgray mb-6`} />
-        <Source source={source} />
+        { word !== null && <WordDetails word={word} /> }
       </div>
     </div>
   )
