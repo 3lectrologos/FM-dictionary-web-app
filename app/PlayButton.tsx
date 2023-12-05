@@ -1,35 +1,38 @@
 import Image from 'next/image'
-import { useState } from 'react'
-import useSound from 'use-sound'
+import { useState, useRef, LegacyRef } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { PuffLoader } from 'react-spinners'
 
 export default function PlayButton({ url }: { url: string }) {
   const [playing, setPlaying] = useState(false)
-  const [play] = useSound(url, {
-    interrupt: true,
-    onend: () => {
-      setPlaying(false)
-    }
-  })
+  const audioRef = useRef<any>(null)
 
   function onPlay() {
     if (playing) {
       return
     }
     setPlaying(true)
-    play()
+    if (!audioRef.current) {
+      return
+    }
+
+    audioRef.current.addEventListener('ended', () => {
+      setPlaying(false)
+    })
+    audioRef.current.play()
   }
 
   return (
     <button className={twJoin(
-      `relative flex justify-center items-center w-12 h-12 rounded-full transition bg-purple/25 group cursor-pointer`,
+      `relative flex justify-center items-center w-12 h-12 rounded-full transition bg-purple/25 group`,
+      `${playing ? 'cursor-default' : 'cursor-pointer'}`,
       `hover:transition ${playing ? 'hover:bg-purple/25' : 'hover:bg-purple'}`,
       `focusable`,
       `tablet:w-[75px] tablet:h-[75px]`
     )}
             onClick={onPlay}
     >
+      <audio src={url} ref={audioRef} />
       { playing ?
         <PuffLoader
           color={`#A445ED`}
