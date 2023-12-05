@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${lora.variable} ${inconsolata.variable} ${noto.variable} font-sans`}>
+      <body className={`${inter.variable} ${lora.variable} ${inconsolata.variable} ${noto.variable}`}>
         <ThemeProvider>
           <main>
             {children}

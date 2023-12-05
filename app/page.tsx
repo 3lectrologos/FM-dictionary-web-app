@@ -216,8 +216,8 @@ function WordDetails({ word }: { word: Word}) {
 function ErrorMessage({ error }: { error: ErrorResult }) {
   return (
     <div className={`flex flex-col items-center text-center mt-24`}>
-      <span className={`text-heading-lg mb-8 font-noto`}>
-        😕
+      <span className={`text-heading-lg mb-8 font-emoji`}>
+        &#x1F615;
       </span>
       <span className={`text-heading-sm !font-bold mb-4`}>
         {error.title}
@@ -232,8 +232,8 @@ function ErrorMessage({ error }: { error: ErrorResult }) {
 function EmptyMessage() {
   return (
     <div className={`flex flex-col items-center text-center mt-24`}>
-      <span className={`text-heading-lg mb-8 font-noto invisible`}>
-        😕
+      <span className={`text-heading-lg mb-8 font-emoji invisible`}>
+        &#x1F615;
       </span>
       <span className={`text-heading-sm !font-bold mb-4`}>
         Search dictionary
