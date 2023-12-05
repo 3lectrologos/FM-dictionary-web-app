@@ -31,7 +31,8 @@ const config: Config = {
     fontFamily: {
       serif: ['var(--font-lora)', 'serif'],
       sans: ['var(--font-inter)', 'sans-serif'],
-      mono: ['var(--font-inconsolata)', 'monospace']
+      mono: ['var(--font-inconsolata)', 'monospace'],
+      noto: ['var(--font-noto)', 'sans-serif']
     }
   },
   plugins: [],

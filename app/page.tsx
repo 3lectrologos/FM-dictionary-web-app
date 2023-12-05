@@ -2,30 +2,13 @@
 
 import Image from 'next/image'
 import { twJoin, twMerge } from 'tailwind-merge'
-import ThemeToggle from '@/app/ThemeToggle'
-import FontSelector from '@/app/FontSelector'
 import { debounce } from 'lodash'
 import { useState } from 'react'
-import { Definition, Phonetics, Word } from '@/app/types'
+import { Definition, Phonetics, Meaning, Word, ErrorResult } from '@/app/types'
 import Link from 'next/link'
-import useSound from 'use-sound'
-import ScaleLoader from 'react-spinners/ScaleLoader'
-import { PuffLoader } from 'react-spinners'
-
-function TopBar() {
-  return (
-    <div className={`w-full flex flex-row justify-between items-center`}>
-      <div className={`relative w-8 h-8`}>
-        <Image src='/images/logo.svg' alt='Logo' fill />
-      </div>
-      <div className={`flex flex-row gap-x-4 items-center`}>
-        <FontSelector />
-        <div className={`w-px h-8 bg-lightgray`} />
-        <ThemeToggle />
-      </div>
-    </div>
-  )
-}
+import { MoonLoader } from 'react-spinners'
+import PlayButton from '@/app/PlayButton'
+import TopBar from '@/app/TopBar'
 
 function Search({ onChange }: { onChange: (term: string) => void }) {
   return (
@@ -45,45 +28,6 @@ function Search({ onChange }: { onChange: (term: string) => void }) {
         <Image src='/images/icon-search.svg' alt='Search icon' fill />
       </div>
     </div>
-  )
-}
-
-function PlayButton({ url }: { url: string }) {
-  const [playing, setPlaying] = useState(false)
-  const [play] = useSound(url, {
-    interrupt: true,
-    onend: () => {
-      setPlaying(false)
-    }
-  })
-
-  function onPlay() {
-    if (playing) {
-      return
-    }
-    setPlaying(true)
-    play()
-  }
-
-  return (
-    <button className={twJoin(
-      `relative flex justify-center items-center w-12 h-12 rounded-full transition bg-purple/25 group cursor-pointer`,
-      `hover:transition ${playing ? 'hover:bg-purple/25' : 'hover:bg-purple'}`,
-      `focusable`
-      )}
-         onClick={onPlay}
-    >
-      { playing ?
-        <PuffLoader
-          color={`#A445ED`}
-          size={28}
-        /> :
-        <>
-          <Image className={`rounded-full transition-opacity group-hover:transition-opacity group-hover:opacity-0`} src={`/images/icon-play.svg`} alt={`Play icon`} fill />
-          <Image className={`rounded-full transition-opacity opacity-0 group-hover:block group-hover:transition-opacity group-hover:opacity-100`} src={`/images/icon-play-white.svg`} alt={`Play icon`} fill />
-        </>
-      }
-    </button>
   )
 }
 
@@ -132,9 +76,12 @@ function PartOfSpeech({ partOfSpeech, className='' }: { partOfSpeech: string, cl
   )
 }
 
-function Synonyms({ synonyms, label='Synonyms' }: { synonyms: string[], label?: string }) {
+function Synonyms({ synonyms, label='Synonyms', className='' }: { synonyms: string[], label?: string, className?: string }) {
   return (
-    <div className={`flex flex-row gap-x-4`}>
+    <div className={twMerge(
+      `flex flex-row gap-x-4`,
+      `${className}`
+    )}>
       <span
         className={twJoin(
           `text-heading-sm text-gray`,
@@ -199,31 +146,28 @@ function Definitions({ definitions, className='' }: { definitions: Definition[],
   )
 }
 
-function Meaning({ partOfSpeech, definitions }: { partOfSpeech: string, definitions: Definition[] }) {
-  const allSynonyms = definitions.reduce(
-    (acc: string[], definition) => definition.synonyms ? acc.concat(definition.synonyms) : acc,
-    [])
-
-  const allAntonyms = definitions.reduce(
-    (acc: string[], definition) => definition.antonyms ? acc.concat(definition.antonyms) : acc,
-    [])
-
+function Meaning({ meaning }: { meaning: Meaning }) {
   return (
     <div className={`flex flex-col gap-y-4`}>
-      <PartOfSpeech className={`mb-4`} partOfSpeech={partOfSpeech} />
+      <PartOfSpeech className={`mb-4`} partOfSpeech={meaning.partOfSpeech} />
       <div className={`text-heading-sm text-gray mb-[1px]`}>
         Meaning
       </div>
-      <Definitions className={``} definitions={definitions} />
-      { (allSynonyms.length > 0) && <Synonyms synonyms={allSynonyms} /> }
-      { (allAntonyms.length > 0) && <Synonyms synonyms={allAntonyms} label='Antonyms' /> }
+      <Definitions className={``} definitions={meaning.definitions} />
+      { meaning.synonyms && (meaning.synonyms.length > 0) &&
+        <Synonyms className={`mt-2`} synonyms={meaning.synonyms} /> }
+      { meaning.antonyms && (meaning.antonyms.length > 0) &&
+        <Synonyms className={`mt-2`} synonyms={meaning.antonyms} label='Antonyms' /> }
     </div>
   )
 }
 
 function Source( { source, className='' }: { source: string, className?: string } ) {
   return (
-    <div className={`flex flex-col gap-y-2`}>
+    <div className={twMerge(
+      `flex flex-col gap-y-2`,
+      `${className}`
+    )}>
       <span className={`text-body-sm underline-offset-2 text-gray`}>
         Source
       </span>
@@ -255,8 +199,7 @@ function WordDetails({ word }: { word: Word}) {
           word.meanings.map((meaning, idx) =>
             <Meaning
               key={idx}
-              partOfSpeech={meaning.partOfSpeech}
-              definitions={meaning.definitions}
+              meaning={meaning}
             />
           )
         }
@@ -267,24 +210,67 @@ function WordDetails({ word }: { word: Word}) {
   )
 }
 
+function ErrorMessage({ error }: { error: ErrorResult }) {
+  return (
+    <div className={`flex flex-col items-center text-center mt-24`}>
+      <span className={`text-heading-lg mb-8 font-noto`}>
+        😕
+      </span>
+      <span className={`text-heading-sm !font-bold mb-4`}>
+        {error.title}
+      </span>
+      <span className={`text-body-sm !no-underline !leading-[1.33] text-gray`}>
+        {error.message} {error.resolution}
+      </span>
+    </div>
+  )
+}
+
+function EmptyMessage() {
+  return (
+    <div className={`flex flex-col items-center text-center mt-24`}>
+      <span className={`text-heading-lg mb-8 font-noto invisible`}>
+        😕
+      </span>
+      <span className={`text-heading-sm !font-bold mb-4`}>
+        Search dictionary
+      </span>
+      <span className={`text-body-sm !no-underline !leading-[1.33] text-gray`}>
+        Type in a word in the search bar above to get started!
+      </span>
+    </div>
+  )
+}
+
 export default function Home() {
   const [word, setWord] = useState<Word|null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<ErrorResult|null>(null)
 
-  function onSearch(term: string) {
-    fetchWord(term)
-  }
+  async function onSearch(term: string) {
+    if (loading) return
+    setLoading(true)
+    setWord(null)
+    setError(null)
 
-  function fetchWord(term: string) {
     const trimmed = term.trim()
     if (trimmed.length === 0) {
-      setWord(null)
+      setLoading(false)
       return
     }
-    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${trimmed}`)
+
+    await new Promise(r => setTimeout(r, 500))
+    await fetchWord(trimmed)
+    setLoading(false)
+  }
+
+  async function fetchWord(term: string) {
+    await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${term}`)
       .then(response => response.json())
       .then(data => {
         if (data.title) {
           setWord(null)
+          setError(data)
           return
         }
         setWord(data[0])
@@ -304,10 +290,18 @@ export default function Home() {
         )}>
         <div className={`flex flex-col gap-y-6 mb-[28px]`}>
           <TopBar />
-          <Search onChange={debounce(onSearch, 750)} />
+          <Search onChange={debounce(onSearch, 1000)} />
         </div>
-
+        { loading &&
+          <div className={`flex justify-center items-center w-full h-full`}>
+            <MoonLoader
+              color={`#A445ED`}
+              size={128}
+            />
+          </div> }
         { word !== null && <WordDetails word={word} /> }
+        { error !== null && <ErrorMessage error={error} /> }
+        { word === null && error === null && !loading && <EmptyMessage /> }
       </div>
     </div>
   )

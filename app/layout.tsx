@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Lora, Inconsolata } from 'next/font/google'
+import { Inter, Lora, Inconsolata, Noto_Color_Emoji } from 'next/font/google'
 import './globals.css'
 import ThemeProvider from '@/app/ThemeProvider'
 
@@ -17,6 +17,12 @@ const inconsolata = Inconsolata({
   variable: '--font-inconsolata'
 })
 
+const noto = Noto_Color_Emoji({
+  subsets: ['emoji'],
+  weight: '400',
+  variable: '--font-noto'
+})
+
 export const metadata: Metadata = {
   title: 'Dictionary Web App'
 }
@@ -28,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${lora.variable} ${inconsolata.variable} font-sans`}>
+      <body className={`${inter.variable} ${lora.variable} ${inconsolata.variable} ${noto.variable} font-sans`}>
         <ThemeProvider>
           <main>
             {children}
