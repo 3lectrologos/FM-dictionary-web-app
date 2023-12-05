@@ -32,7 +32,7 @@ const config: Config = {
       serif: ['var(--font-lora)', 'serif'],
       sans: ['var(--font-inter)', 'sans-serif'],
       mono: ['var(--font-inconsolata)', 'monospace'],
-      emoji: ['var(--font-noto)', 'Apple Color Emoji', 'Twemoji Mozilla', 'Segoe UI Emoji', 'EmojiOne Color', 'sans-serif']
+      emoji: ['Apple Color Emoji', 'var(--font-noto)', 'Twemoji Mozilla', 'Segoe UI Emoji', 'EmojiOne Color', 'sans-serif']
     }
   },
   plugins: [],
