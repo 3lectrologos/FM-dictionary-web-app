@@ -12,12 +12,13 @@ import TopBar from '@/app/TopBar'
 
 function Search({ onChange }: { onChange: (term: string) => void }) {
   return (
-    <div className={`relative w-[327px]`}>
+    <div className={`relative w-full`}>
       <input
-        className={twMerge(
-          `w-full h-12 rounded-2xl pl-6 pr-14 text-heading-sm leading-none font-bold`,
+        className={twJoin(
+          `w-full h-12 rounded-2xl pl-6 pr-14 text-heading-sm !leading-none !font-bold`,
           `bg-offwhite dark:bg-offblack text-verydarkgray dark:text-white`,
-          `focus:outline-none focus:ring-1 ring-purple`
+          `focus:outline-none focus:ring-1 ring-purple`,
+          `tablet:h-16`
         )}
         type='text'
         name='search'
@@ -120,7 +121,8 @@ function Definitions({ definitions, className='' }: { definitions: Definition[],
         definitions.map((definition, idx) =>
           <li className={twMerge(
             `relative flex flex-row gap-x-4 text-body-md`,
-            `marker:content-['•']`
+            `marker:content-['•']`,
+            `tablet:ml-[22px]`
           )}
               key={idx}
           >
@@ -128,7 +130,7 @@ function Definitions({ definitions, className='' }: { definitions: Definition[],
               <div className={`w-[5px] h-[5px] rounded-full bg-darkpurple visible`} />
               i
             </div>
-            <div className={`flex flex-col gap-y-2`}>
+            <div className={`flex flex-col gap-y-3`}>
                 <span>
                   {definition.definition}
                 </span>
@@ -148,16 +150,16 @@ function Definitions({ definitions, className='' }: { definitions: Definition[],
 
 function Meaning({ meaning }: { meaning: Meaning }) {
   return (
-    <div className={`flex flex-col gap-y-4`}>
+    <div className={`flex flex-col gap-y-4 tablet:gap-y-6`}>
       <PartOfSpeech className={`mb-4`} partOfSpeech={meaning.partOfSpeech} />
       <div className={`text-heading-sm text-gray mb-[1px]`}>
         Meaning
       </div>
       <Definitions className={``} definitions={meaning.definitions} />
       { meaning.synonyms && (meaning.synonyms.length > 0) &&
-        <Synonyms className={`mt-2`} synonyms={meaning.synonyms} /> }
+        <Synonyms className={`mt-2 tablet:mt-4`} synonyms={meaning.synonyms} /> }
       { meaning.antonyms && (meaning.antonyms.length > 0) &&
-        <Synonyms className={`mt-2`} synonyms={meaning.antonyms} label='Antonyms' /> }
+        <Synonyms className={`mt-2 tablet:mt-4`} synonyms={meaning.antonyms} label='Antonyms' /> }
     </div>
   )
 }
@@ -166,6 +168,7 @@ function Source( { source, className='' }: { source: string, className?: string 
   return (
     <div className={twMerge(
       `flex flex-col gap-y-2`,
+      `tablet:flex-row tablet:gap-x-5 tablet:items-center`,
       `${className}`
     )}>
       <span className={`text-body-sm underline-offset-2 text-gray`}>
@@ -177,7 +180,7 @@ function Source( { source, className='' }: { source: string, className?: string 
             {source}
           </Link>
         </span>
-        <div className={`relative w-[14px] h-full`}>
+        <div className={`relative w-[14px] h-[14px]`}>
           <Image src='/images/icon-new-window.svg' alt='Link icon' fill />
         </div>
       </div>
@@ -190,11 +193,11 @@ function WordDetails({ word }: { word: Word}) {
   return (
     <>
       <WordTitle
-        className={`mb-8`}
+        className={`mb-8 tablet:mb-10`}
         word={word.word}
         phonetics={word.phonetics}
       />
-      <div className={`flex flex-col gap-y-8 mb-8`}>
+      <div className={`flex flex-col gap-y-8 mb-8 tablet:gap-y-10 tablet:mb-10`}>
         {
           word.meanings.map((meaning, idx) =>
             <Meaning
@@ -285,11 +288,11 @@ export default function Home() {
     <div className={`flex min-h-screen min-w-fit justify-center bg-white dark:bg-black text-verydarkgray dark:text-white`}>
       <div className={twMerge(
         `flex flex-col`,
-        `w-full`,
-        `p-6`
+        `w-full max-w-[816px]`,
+        `p-6 tablet:p-10 tablet:pt-14`
         )}>
-        <div className={`flex flex-col gap-y-6 mb-[28px]`}>
-          <TopBar />
+        <div className={`flex flex-col gap-y-6 mb-[28px] tablet:gap-y-[51px] tablet:mb-10`}>
+          <TopBar className={``} />
           <Search onChange={debounce(onSearch, 1000)} />
         </div>
         { loading &&

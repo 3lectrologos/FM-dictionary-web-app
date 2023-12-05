@@ -22,7 +22,7 @@ export default function ThemeToggle() {
   }
 
   return (
-    <div className={`flex flex-row items-center gap-x-3`}>
+    <div className={`flex flex-row items-center gap-x-3 tablet:gap-x-4`}>
       <div
         className={`relative inline-flex items-center cursor-pointer outline-none group`}
         onClick={() => resolvedTheme === 'dark' ? setTheme('light') : setTheme('dark')}

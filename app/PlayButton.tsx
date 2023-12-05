@@ -25,7 +25,8 @@ export default function PlayButton({ url }: { url: string }) {
     <button className={twJoin(
       `relative flex justify-center items-center w-12 h-12 rounded-full transition bg-purple/25 group cursor-pointer`,
       `hover:transition ${playing ? 'hover:bg-purple/25' : 'hover:bg-purple'}`,
-      `focusable`
+      `focusable`,
+      `tablet:w-[75px] tablet:h-[75px]`
     )}
             onClick={onPlay}
     >

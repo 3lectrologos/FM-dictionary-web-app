@@ -11,15 +11,35 @@ enum FontFamily {
 }
 const fontFamilyList = Object.values(FontFamily)
 const fontFamilyNames = ['Sans Serif', 'Serif', 'Monospace']
+const initialFontFamily = FontFamily.sans
 
 export default function FontSelector() {
-  const [selectedFont, setSelectedFont] = useState<FontFamily>(FontFamily.sans)
+  const [selectedFont, setSelectedFont] = useState<FontFamily|null>(null)
   const [active, setActive] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    const savedFont = localStorage.getItem('font')
+    if (!savedFont) {
+      setSelectedFont(initialFontFamily)
+    } else {
+      setSelectedFont(savedFont as FontFamily)
+    }
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!selectedFont) {
+      return
+    }
     document.body.classList.remove('font-sans', 'font-serif', 'font-mono')
     document.body.classList.add(`font-${selectedFont}`)
+    localStorage.setItem('font', selectedFont)
   }, [selectedFont])
+
+  if (!mounted || !selectedFont) {
+    return null
+  }
 
   return (
     <div className={`relative`}>
