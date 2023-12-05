@@ -159,7 +159,8 @@ function Meaning({ meaning }: { meaning: Meaning }) {
       { meaning.synonyms && (meaning.synonyms.length > 0) &&
         <Synonyms className={`mt-2 tablet:mt-4`} synonyms={meaning.synonyms} /> }
       { meaning.antonyms && (meaning.antonyms.length > 0) &&
-        <Synonyms className={`mt-2 tablet:mt-4`} synonyms={meaning.antonyms} label='Antonyms' /> }
+        <Synonyms className={`${meaning.synonyms && (meaning.synonyms.length > 0) ? '' : 'mt-2 tablet:mt-4'}`}
+                  synonyms={meaning.antonyms} label='Antonyms' /> }
     </div>
   )
 }
