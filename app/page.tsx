@@ -113,7 +113,7 @@ function Synonyms({ synonyms, label='Synonyms', className='' }: { synonyms: stri
 function Definitions({ definitions, className='' }: { definitions: Definition[], className?: string }) {
   return (
     <ul className={twMerge(
-      `flex flex-col gap-y-[13px]`,
+      `flex flex-col gap-y-[14px]`,
       `${className}`
       )}
     >
@@ -130,13 +130,12 @@ function Definitions({ definitions, className='' }: { definitions: Definition[],
               <div className={`w-[5px] h-[5px] rounded-full bg-darkpurple visible`} />
               i
             </div>
-            <div className={`flex flex-col gap-y-3`}>
+            <div className={`flex flex-col gap-y-2`}>
                 <span>
                   {definition.definition}
                 </span>
-              {
-                definition.example &&
-                <span className={`text-gray ${(idx === definitions.length - 1) ? '' : 'mb-2'}`}>
+              { definition.example &&
+                <span className={`text-gray`}>
                   “{definition.example}”
                 </span>
               }
